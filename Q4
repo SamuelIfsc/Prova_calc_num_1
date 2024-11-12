@@ -1,0 +1,51 @@
+import numpy as np
+import pandas as pd
+
+# Configuração inicial
+x1, x2 = 0.0, 0.0  # Aproximação inicial
+tolerance = 0.05 / 100  # Critério de parada em decimal (0.05%)
+max_iterations = 100  # Número máximo de iterações
+iterations = []  # Lista para armazenar os valores de cada iteração
+
+# Funções isoladas para cada variável
+def calc_x1(x2):
+    return (200 + 10 * x2) / 35
+
+def calc_x2(x1):
+    return (10 * x1) / 40
+
+# Método de Gauss-Seidel
+for iteration in range(max_iterations):
+    x1_old, x2_old = x1, x2  # Valores anteriores para cálculo do erro
+    
+    # Atualização de x1 e x2
+    x1 = calc_x1(x2)
+    x2 = calc_x2(x1)
+    
+    # Cálculo do erro relativo
+    ea_x1 = abs((x1 - x1_old) / x1) * 100 if x1 != 0 else float('inf')
+    ea_x2 = abs((x2 - x2_old) / x2) * 100 if x2 != 0 else float('inf')
+    
+    # Armazena os valores da iteração atual
+    iterations.append([iteration + 1, round(x1, 4), round(x2, 4), round(ea_x1, 4), round(ea_x2, 4)])
+    
+    # Verifica o critério de parada
+    if ea_x1 < tolerance and ea_x2 < tolerance:
+        break
+
+# Armazenando os resultados finais
+x_result = np.round([x1, x2], 4)
+num_iterations = iteration + 1
+final_error_x1 = round(ea_x1, 4)
+final_error_x2 = round(ea_x2, 4)
+
+# Exibindo a tabela de iterações
+df_iterations = pd.DataFrame(iterations, columns=["Iteração", "x1", "x2", "Erro x1 (%)", "Erro x2 (%)"])
+print(df_iterations)
+
+# Exibindo os resultados finais no console
+print("\nSolução aproximada do sistema:")
+print(f"x1 ≈ {x_result[0]}, x2 ≈ {x_result[1]}")
+print(f"Número de iterações: {num_iterations}")
+print(f"Erro final em x1: {final_error_x1}%")
+print(f"Erro final em x2: {final_error_x2}%")
