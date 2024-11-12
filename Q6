@@ -1,0 +1,27 @@
+# Função que queremos encontrar a raiz
+def f(x):
+    return x**3 - 2*x - 5
+
+# Implementação do Método da Bisseção
+def bisection_method(f, a, b, tolerance=1e-4, max_iterations=100):
+    if f(a) * f(b) >= 0:
+        raise ValueError("O intervalo inicial não contém uma mudança de sinal.")
+    
+    iteration = 0
+    while (b - a) / 2 > tolerance and iteration < max_iterations:
+        c = (a + b) / 2  # Ponto médio
+        if f(c) == 0:
+            return c, iteration  # Encontramos a raiz exata
+        elif f(a) * f(c) < 0:
+            b = c  # A raiz está no intervalo [a, c]
+        else:
+            a = c  # A raiz está no intervalo [c, b]
+        iteration += 1
+    
+    # Retorna a raiz aproximada e o número de iterações
+    return (a + b) / 2, iteration
+
+# Aplicando o método ao problema
+raiz, iteracoes = bisection_method(f, 2, 3)
+print(f"Raiz aproximada: {raiz:.4f}")
+print(f"Número de iterações: {iteracoes}")
