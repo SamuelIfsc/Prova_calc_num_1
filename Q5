@@ -1,0 +1,66 @@
+import numpy as np
+import pandas as pd
+# Q5
+# Definindo as funções do sistema
+def f1(x1, x2):
+    return 2 * x1 + 2 * x1 * x2 - 10
+
+def f2(x1, x2):
+    return 2 * x2 + 2 * x2 * x2 - 10
+
+# Derivadas parciais para a matriz Jacobiana
+def jacobian(x1, x2):
+    return np.array([
+        [2 + 2 * x2, 2 * x1],
+        [0, 2 + 4 * x2]
+    ], dtype=float)
+
+# Parâmetros iniciais
+x1, x2 = 1.0, 1.0  # Aproximação inicial
+tolerance = 0.1 / 100  # Critério de parada (0,1%)
+max_iterations = 100  # Limite de iterações
+iterations = []  # Armazena resultados de cada iteração
+
+# Método de Newton-Raphson para sistemas não lineares
+for i in range(max_iterations):
+    # Avaliação das funções e da Jacobiana
+    F = np.array([f1(x1, x2), f2(x1, x2)], dtype=float)
+    J = jacobian(x1, x2)
+    
+    # Resolvendo o sistema linear J * delta = -F para encontrar delta
+    delta = np.linalg.solve(J, -F)
+    
+    # Atualizando x1 e x2
+    x1_new, x2_new = x1 + delta[0], x2 + delta[1]
+    
+    # Calculando o erro relativo para o critério de parada
+    ea_x1 = abs((x1_new - x1) / x1_new) * 100
+    ea_x2 = abs((x2_new - x2) / x2_new) * 100
+    
+    # Armazenando resultados da iteração
+    iterations.append([i + 1, round(x1_new, 4), round(x2_new, 4), round(ea_x1, 4), round(ea_x2, 4)])
+    
+    # Critério de parada
+    if ea_x1 < tolerance and ea_x2 < tolerance:
+        x1, x2 = x1_new, x2_new
+        break
+    
+    # Atualiza valores para a próxima iteração
+    x1, x2 = x1_new, x2_new
+
+# Armazenando resultados finais
+x_result = np.round([x1, x2], 4)
+num_iterations = i + 1
+final_error_x1 = round(ea_x1, 4)
+final_error_x2 = round(ea_x2, 4)
+
+# Exibindo a tabela de iterações
+df_iterations = pd.DataFrame(iterations, columns=["Iteração", "x1", "x2", "Erro x1 (%)", "Erro x2 (%)"])
+print(df_iterations)
+
+# Exibindo os resultados finais no console
+print("\nSolução aproximada do sistema:")
+print(f"x1 ≈ {x_result[0]}, x2 ≈ {x_result[1]}")
+print(f"Número de iterações: {num_iterations}")
+print(f"Erro final em x1: {final_error_x1}%")
+print(f"Erro final em x2: {final_error_x2}%")
