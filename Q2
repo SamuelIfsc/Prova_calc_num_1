@@ -1,0 +1,55 @@
+import pandas as pd
+
+# Definição das funções
+def f(x):
+    # Função f(x) = x^2 - 4x + 2
+    return x**2 - 4*x + 2
+
+def f_prime(x):
+    # Derivada da função f'(x) = 2x - 4
+    return 2*x - 4
+
+# Valor inicial e configuração
+x_i = 3.0  # Aproximação inicial x0
+tolerance = 0.01 / 100  # Convertendo o critério de parada de 0,01% para decimal
+iterations = []  # Lista para armazenar os dados de cada iteração
+max_iter = 20  # Limite máximo de iterações para evitar loop infinito
+
+# Executa as iterações do Método de Newton-Raphson
+for i in range(max_iter):
+    # Calcula f(xi) e f'(xi) usando as funções definidas
+    f_xi = f(x_i)
+    f_prime_xi = f_prime(x_i)
+    
+    # Aplica a fórmula de Newton-Raphson: xi+1 = xi - f(xi) / f'(xi)
+    x_next = x_i - f_xi / f_prime_xi
+    
+    # Calcula o erro aproximado (ea) como percentual
+    ea = abs((x_next - x_i) / x_next) * 100  # Usamos o valor absoluto
+    
+    # Armazena os dados da iteração atual na lista
+    # Colocamos "X" para o erro da primeira iteração, pois não há valor anterior
+    iterations.append([i, x_i, f_xi, ea if i > 0 else "X"])
+    
+    # Verifica o critério de parada: se o erro for menor que a tolerância
+    if ea < tolerance and i > 0:
+        break  # Encerra o loop se o critério for atendido
+    
+    # Atualiza o valor de xi para a próxima iteração
+    x_i = x_next
+
+# Armazena os resultados em um DataFrame para visualização
+df_iterations = pd.DataFrame(iterations, columns=["Iteration", "Xi", "F(Xi)", "Ea (%)"])
+
+# Exibe a tabela de iterações para o usuário
+print(df_iterations)
+
+# Resultados finais
+final_root = x_i  # Valor da raiz encontrada
+num_iterations = i  # Número de iterações realizadas
+final_error = ea if i > 0 else None  # Erro final atingido, caso aplicável
+
+# Exibe o valor da raiz aproximada, o número de iterações e o erro final
+print("\nRaiz aproximada:", round(final_root, 4))
+print("Número de iterações:", num_iterations)
+print("Erro final (a):", round(final_error, 4), "%")
