@@ -1,50 +1,44 @@
-import pandas as pd
+import numpy as np
 
-# Definição das funções
-def f(x):
-    return x**2 - 4*x + 2
+# Definindo a matriz dos coeficientes A e o vetor dos termos independentes B
+A = np.array([
+    [1, 1, 1, 2],
+    [2, 1, 0, 2],
+    [0, 1, 1, 1],
+    [2, 0, 1, 2]
+], dtype=float)
 
-def f_prime(x):
-    return 2*x - 4
+B = np.array([25, 25, 15, 25], dtype=float)
 
-# Valor inicial e configurações
-x_i = 3.0  # Aproximação inicial
-tolerance = 0.01 / 100  # Critério de parada em decimal
-iterations = []
-max_iter = 20  # Limite de iterações
-
-# Executa as iterações do Método de Newton-Raphson
-for i in range(max_iter):
-    f_xi = f(x_i)
-    f_prime_xi = f_prime(x_i)
-    x_next = x_i - f_xi / f_prime_xi  # Calcula xi+1
-    ea = abs((x_next - x_i) / x_next) * 100  # Calcula o erro aproximado em porcentagem
+# Função para aplicar o método de Eliminação de Gauss
+def gauss_elimination(A, B):
+    n = len(B)
+    # Fase de Eliminação
+    for i in range(n):
+        # Pivoteamento parcial
+        max_row = i + np.argmax(abs(A[i:, i]))
+        if A[max_row, i] == 0:
+            raise ValueError("O sistema não tem solução única.")
+        # Trocar a linha i com a linha do elemento máximo
+        A[[i, max_row]] = A[[max_row, i]]
+        B[[i, max_row]] = B[[max_row, i]]
+        
+        # Tornar o elemento pivô igual a 1 e zerar os elementos abaixo
+        for j in range(i + 1, n):
+            factor = A[j, i] / A[i, i]
+            A[j, i:] -= factor * A[i, i:]
+            B[j] -= factor * B[i]
     
-    # Armazena dados da iteração atual com valores exatos
-    iterations.append([i, x_i, f_xi, ea if i > 0 else "X"])
-    
-    # Verifica o critério de parada
-    if i > 0 and ea < tolerance:
-        break
-    
-    # Atualiza x_i para a próxima iteração
-    x_i = x_next
+    # Fase de Retrosubstituição
+    x = np.zeros(n)
+    for i in range(n - 1, -1, -1):
+        x[i] = (B[i] - np.dot(A[i, i + 1:], x[i + 1:])) / A[i, i]
+    return x
 
-# Cria um DataFrame para armazenar os resultados das iterações
-df_iterations = pd.DataFrame(iterations, columns=["Iteration", "Xi", "F(Xi)", "Ea (%)"])
-
-# Arredonda para 4 casas decimais na exibição
-df_iterations = df_iterations.round({"Xi": 4, "F(Xi)": 4, "Ea (%)": 4})
-
-# Exibe a tabela de iterações para o usuário
-print(df_iterations)
-
-# Resultados finais arredondados para 4 casas decimais
-final_root = round(x_i, 4)
-num_iterations = i
-final_error = round(ea, 4) if i > 0 else None
-
-# Exibe o valor da raiz aproximada, o número de iterações e o erro final
-print("\nRaiz aproximada:", final_root)
-print("Número de iterações:", num_iterations)
-print("Erro final (a):", final_error, "%")
+# Resolvendo o sistema com Eliminação de Gauss
+try:
+    x_gauss = gauss_elimination(A.copy(), B.copy())
+    x_gauss_rounded = np.round(x_gauss, 4)  # Arredondando para 4 casas decimais
+    print("Solução do sistema:", x_gauss_rounded)
+except ValueError as e:
+    print("Erro:", e)
